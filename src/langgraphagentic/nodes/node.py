@@ -2,9 +2,32 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from project root
+# Load .env from project root (for local development)
 env_path = Path(__file__).resolve().parents[3] / ".env"
 load_dotenv(env_path)
+
+# Helper function to get API key (supports both local .env and Streamlit secrets)
+def get_api_key(key_name):
+    """Get API key from environment variables or Streamlit secrets."""
+    # First try environment variables (works locally with .env)
+    value = os.getenv(key_name)
+    if value:
+        return value
+    
+    # Try Streamlit secrets (works on Streamlit Cloud)
+    try:
+        import streamlit as st
+        if key_name in st.secrets:
+            return st.secrets[key_name]
+    except Exception:
+        pass
+    
+    return None
+
+# Set OpenAI API key in environment for LangChain to use
+openai_key = get_api_key("OPENAI_API_KEY")
+if openai_key:
+    os.environ["OPENAI_API_KEY"] = openai_key
 
 from langchain_openai import ChatOpenAI
 from src.langgraphagentic.tools.stock_tools import get_stock_price, get_earnings_calendar, get_company_overview

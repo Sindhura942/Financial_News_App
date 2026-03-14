@@ -4,14 +4,26 @@ from dotenv import load_dotenv
 from langchain_core.tools import tool
 import requests
 
-# Load .env from project root
+# Load .env from project root (for local development)
 env_path = Path(__file__).resolve().parents[3] / ".env"
 load_dotenv(env_path)
+
+def get_api_key(key_name):
+    """Get API key from environment or Streamlit secrets"""
+    api_key = os.getenv(key_name)
+    if api_key:
+        return api_key
+    # Try Streamlit secrets (for cloud deployment)
+    try:
+        import streamlit as st
+        return st.secrets.get(key_name)
+    except:
+        return None
 
 @tool
 def get_stock_price(symbol: str) -> dict:
     """Get the current stock price for a given symbol like AAPL, MSFT, SCHW, etc."""
-    api_key = os.getenv("ALPHAVANTAGE_API_KEY")
+    api_key = get_api_key("ALPHAVANTAGE_API_KEY")
     url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}"
     r = requests.get(url)
     return r.json()
@@ -23,7 +35,7 @@ def get_earnings_calendar(symbol: str) -> dict:
     Use this for accurate earnings dates instead of web search.
     Example: get_earnings_calendar("SCHW") for Charles Schwab earnings date.
     """
-    api_key = os.getenv("ALPHAVANTAGE_API_KEY")
+    api_key = get_api_key("ALPHAVANTAGE_API_KEY")
     url = f"https://www.alphavantage.co/query?function=EARNINGS_CALENDAR&symbol={symbol}&horizon=3month&apikey={api_key}"
     r = requests.get(url)
     
@@ -47,7 +59,7 @@ def get_company_overview(symbol: str) -> dict:
     Get company overview including description, sector, industry, market cap, 
     P/E ratio, dividend yield, 52-week high/low, and earnings dates.
     """
-    api_key = os.getenv("ALPHAVANTAGE_API_KEY")
+    api_key = get_api_key("ALPHAVANTAGE_API_KEY")
     url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
     r = requests.get(url)
     data = r.json()

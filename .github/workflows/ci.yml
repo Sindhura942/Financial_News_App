@@ -1,0 +1,50 @@
+# GitHub Actions CI Workflow
+# This runs automatically when you push code to GitHub
+
+name: CI - Test App
+
+# When to run this workflow
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# The jobs to run
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Get the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # Step 4: Check for syntax errors
+      - name: Check Python syntax
+        run: |
+          python -m py_compile app.py
+          python -m py_compile src/langgraphagentic/graph/graph_builder.py
+          python -m py_compile src/langgraphagentic/nodes/node.py
+      
+      # Step 5: Basic import test
+      - name: Test imports
+        env:
+          OPENAI_API_KEY: "test-key"
+          ALPHAVANTAGE_API_KEY: "test-key"
+          TAVILY_API_KEY: "test-key"
+        run: |
+          python -c "from src.langgraphagentic.state.state import State; print('✅ State import OK')"
+          python -c "from src.langgraphagentic.tools.stock_tools import get_stock_price; print('✅ Tools import OK')"

@@ -2,9 +2,14 @@
 
 An AI-powered financial research chatbot built with LangGraph, OpenAI, and Streamlit. Get real-time stock prices, earnings dates, company information, and financial news in one place.
 
+## 🚀 Live Demo
+
+**👉 [Try the App Here](https://financial-research-assistant.streamlit.app)**
+
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-green)
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://financial-research-assistant.streamlit.app)
 
 ## ✨ Features
 

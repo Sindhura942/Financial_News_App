@@ -220,6 +220,6 @@ MIT License
 
 ## 📧 Contact
 
-Your Name - your.email@example.com
+Your Name - mulpurisindhura942@gmail.com
 
 Project Link: https://github.com/yourusername/Financial_News_App

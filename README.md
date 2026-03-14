@@ -180,7 +180,7 @@ Output: Recent news articles with titles, URLs, and summaries
 The app uses LangGraph's `MemorySaver` for stateful conversations:
 
 ```python
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph. checkpoint.memory import MemorySaver
 
 memory = MemorySaver()
 chatbot = graph.compile(checkpointer=memory)
@@ -220,6 +220,6 @@ MIT License
 
 ## 📧 Contact
 
-Your Name - your.email@example.com
+Your Name - mulpurisindhura942@gmail.com
 
-Project Link: https://github.com/yourusername/Financial_News_App
+Project Link:(https://github.com/Sindhura942/Financial_News_App.git)

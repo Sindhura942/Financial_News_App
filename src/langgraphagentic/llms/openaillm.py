@@ -16,7 +16,7 @@ class OpenAILLM:
             )
             selected_openai_model = (
                 self.user_controls_input.get("selected_groq_model")
-                or "llama-3.3-70b-versatile"
+                or "gpt-5.1"
             )
 
             if not openai_api_key:

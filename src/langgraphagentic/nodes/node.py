@@ -13,12 +13,12 @@ env_path = Path(__file__).parent.parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # Get OpenAI API key from environment or Streamlit secrets
-def get_openai_api_key():
+def get_groq_api_key():
     try:
         import streamlit as st
-        return st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+        return st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
     except:
-        return os.getenv("OPENAI_API_KEY")
+        return os.getenv("GROQ_API_KEY")
 
 # Combine all tools
 search_tools = get_tools()
@@ -26,7 +26,7 @@ finnhub_tools = get_finnhub_tools()
 yahoo_tools = get_yahoo_tools()
 tools = [get_stock_price, get_earnings_calendar, get_company_overview] + search_tools + finnhub_tools + yahoo_tools
 
-llm = ChatOpenAI(model="gpt-4o-mini", api_key=get_openai_api_key())
+llm = ChatGroq(model="mixtral-8x7b-32768", api_key=get_groq_api_key())
 llm_with_tools = llm.bind_tools(tools)
 
 # System prompt for accurate financial data

@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from src.langgraphagentic.state.state import State
 from src.langgraphagentic.tools.stock_tools import get_stock_price, get_earnings_calendar, get_company_overview
 from src.langgraphagentic.tools.search_tool import get_tools
@@ -13,12 +13,12 @@ env_path = Path(__file__).parent.parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # Get OpenAI API key from environment or Streamlit secrets
-def get_groq_api_key():
+def get_openai_api_key():
     try:
         import streamlit as st
-        return st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+        return st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
     except:
-        return os.getenv("GROQ_API_KEY")
+        return os.getenv("OPENAI_API_KEY")
 
 # Combine all tools
 search_tools = get_tools()
@@ -26,7 +26,7 @@ finnhub_tools = get_finnhub_tools()
 yahoo_tools = get_yahoo_tools()
 tools = [get_stock_price, get_earnings_calendar, get_company_overview] + search_tools + finnhub_tools + yahoo_tools
 
-llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=get_groq_api_key())
+llm = ChatOpenAI(model="llama-3.3-70b-versatile", api_key=get_openai_api_key())
 llm_with_tools = llm.bind_tools(tools)
 
 # System prompt for accurate financial data

@@ -189,10 +189,11 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🔧 Powered by")
     st.markdown("""
-    - OpenAI GPT-4o-mini
+    - Groq 
+    - Yahoofinance
+    - Finnhub
     - Alpha Vantage API
     - Tavily Search
-    - LangGraph
     """)
     
     st.markdown("---")

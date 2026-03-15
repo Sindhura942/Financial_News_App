@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from src.langgraphagentic.state.state import State
 from src.langgraphagentic.tools.stock_tools import get_stock_price, get_earnings_calendar, get_company_overview
 from src.langgraphagentic.tools.search_tool import get_tools

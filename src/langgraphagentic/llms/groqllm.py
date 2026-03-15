@@ -16,7 +16,7 @@ class GroqLLM:
             )
             selected_groq_model = (
                 self.user_controls_input.get("selected_groq_model")
-                or "mixtral-8x7b-32768"
+                or "llama3-8b-8192"
             )
 
             if not groq_api_key:

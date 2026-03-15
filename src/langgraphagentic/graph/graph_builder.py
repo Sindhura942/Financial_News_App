@@ -5,7 +5,7 @@ from src.langgraphagentic.nodes.node import chat_node
 from src.langgraphagentic.tools.stock_tools import get_stock_price, get_earnings_calendar, get_company_overview
 from src.langgraphagentic.tools.search_tool import get_tools
 from src.langgraphagentic.state.state import State as ChatState
-from src.langgraphagentic.graph.graph_builder import chatbot
+
 
 # Get Tavily search tool and add Alpha Vantage tools
 search_tools = get_tools()

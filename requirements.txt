@@ -1,8 +1,10 @@
-langchain
 langgraph
-langchain_community
-langchain_core
-langchain_openai
-faiss-cpu
+langchain
+langchain-openai
+langchain-community
+python-dotenv
 streamlit
+requests
 tavily-python
+finnhub-python
+yfinance

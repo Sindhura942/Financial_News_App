@@ -1,68 +1,69 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-
-# Load .env from project root (for local development)
-env_path = Path(__file__).resolve().parents[3] / ".env"
-load_dotenv(env_path)
-
-# Helper function to get API key (supports both local .env and Streamlit secrets)
-def get_api_key(key_name):
-    """Get API key from environment variables or Streamlit secrets."""
-    # First try environment variables (works locally with .env)
-    value = os.getenv(key_name)
-    if value:
-        return value
-    
-    # Try Streamlit secrets (works on Streamlit Cloud)
-    try:
-        import streamlit as st
-        if key_name in st.secrets:
-            return st.secrets[key_name]
-    except Exception:
-        pass
-    
-    return None
-
-# Set OpenAI API key in environment for LangChain to use
-openai_key = get_api_key("OPENAI_API_KEY")
-if openai_key:
-    os.environ["OPENAI_API_KEY"] = openai_key
-
 from langchain_openai import ChatOpenAI
+from src.langgraphagentic.state.state import State
 from src.langgraphagentic.tools.stock_tools import get_stock_price, get_earnings_calendar, get_company_overview
 from src.langgraphagentic.tools.search_tool import get_tools
+from src.langgraphagentic.tools.finnhub_tools import get_finnhub_tools
+from src.langgraphagentic.tools.yahoo_tools import get_yahoo_tools
+from dotenv import load_dotenv
+from pathlib import Path
+import os
 
-# Get Tavily search tool and add Alpha Vantage tools
+# Load environment variables
+env_path = Path(__file__).parent.parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Get OpenAI API key from environment or Streamlit secrets
+def get_openai_api_key():
+    try:
+        import streamlit as st
+        return st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+    except:
+        return os.getenv("OPENAI_API_KEY")
+
+# Combine all tools
 search_tools = get_tools()
-tools = [get_stock_price, get_earnings_calendar, get_company_overview] + search_tools
+finnhub_tools = get_finnhub_tools()
+yahoo_tools = get_yahoo_tools()
+tools = [get_stock_price, get_earnings_calendar, get_company_overview] + search_tools + finnhub_tools + yahoo_tools
 
-# System prompt to improve accuracy
-system_prompt = """You are a financial research assistant with access to accurate financial data tools.
-
-IMPORTANT - Use the right tool for accurate data:
-- For EARNINGS DATES: Use get_earnings_calendar (Alpha Vantage) - this is accurate
-- For STOCK PRICES: Use get_stock_price (Alpha Vantage) - this is real-time
-- For COMPANY INFO: Use get_company_overview (Alpha Vantage) - this is accurate
-- For NEWS/GENERAL INFO: Use tavily_search - for recent news articles
-
-Always prefer Alpha Vantage tools over web search for financial data like:
-- Earnings dates
-- Stock prices
-- Company fundamentals
-- Financial metrics
-
-Only use web search for news articles and general information.
-"""
-
-llm = ChatOpenAI(model="gpt-4o-mini")
+llm = ChatOpenAI(model="gpt-4o-mini", api_key=get_openai_api_key())
 llm_with_tools = llm.bind_tools(tools)
 
-def chat_node(state):
+# System prompt for accurate financial data
+SYSTEM_PROMPT = """You are a helpful financial research assistant with access to multiple data sources:
+
+📊 **Alpha Vantage** (US Stocks):
+- get_stock_price: Real-time US stock prices
+- get_earnings_calendar: Earnings announcement dates  
+- get_company_overview: Company information
+
+🌍 **Finnhub** (Global Stocks):
+- get_global_stock_quote: Real-time global stock quotes
+- get_company_news: Latest company news
+- get_market_status: Check if markets are open
+- search_stock_symbol: Find stock symbols
+
+📈 **Yahoo Finance** (Detailed Analysis):
+- get_stock_info: Comprehensive stock data (price, P/E, dividends, etc.)
+- get_stock_history: Historical price data
+- get_analyst_recommendations: Buy/Hold/Sell ratings
+- get_financials: Revenue, profit, margins
+- compare_stocks: Compare multiple stocks side by side
+
+🔍 **Tavily Search**: Financial news and research
+
+**Stock Symbol Formats:**
+- US: AAPL, MSFT, GOOGL
+- India NSE: TCS.NS, RELIANCE.NS
+- India BSE: TCS.BO, RELIANCE.BO  
+- Germany: BMW.DE, SAP.DE
+- UK: HSBA.L, BP.L
+
+Always use the most appropriate tool for the user's question."""
+
+def chat_node(state: State):
     messages = state["messages"]
-    # Add system prompt if not already present
     from langchain_core.messages import SystemMessage
-    if not any(isinstance(m, SystemMessage) for m in messages):
-        messages = [SystemMessage(content=system_prompt)] + list(messages)
-    response = llm_with_tools.invoke(messages)
+    messages_with_system = [SystemMessage(content=SYSTEM_PROMPT)] + messages
+    response = llm_with_tools.invoke(messages_with_system)
     return {"messages": [response]}

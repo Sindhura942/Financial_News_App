@@ -26,7 +26,7 @@ finnhub_tools = get_finnhub_tools()
 yahoo_tools = get_yahoo_tools()
 tools = [get_stock_price, get_earnings_calendar, get_company_overview] + search_tools + finnhub_tools + yahoo_tools
 
-llm = ChatGroq(model="llama3-8b-8192", api_key=get_groq_api_key())
+llm = ChatGroq(model="llama3-70b-8192", api_key=get_groq_api_key())
 llm_with_tools = llm.bind_tools(tools)
 
 # System prompt for accurate financial data

@@ -75,6 +75,7 @@ st.markdown("""
 
 # Import after dotenv is loaded
 from langchain_core.messages import HumanMessage
+from langgraph.types import Command
 from src.langgraphagentic.graph.graph_builder import chatbot
 
 # Initialize chat history in session state
@@ -87,6 +88,38 @@ if "thread_id" not in st.session_state:
 # Function to handle button clicks
 def handle_quick_action(query):
     st.session_state.quick_query = query
+
+# Helper function to run chatbot with HITL support
+def run_chatbot_with_hitl(prompt):
+    """Run the chatbot and handle Human-in-the-Loop interrupts for purchase_stock."""
+    result = chatbot.invoke(
+        {"messages": [HumanMessage(content=prompt)]},
+        config={"configurable": {"thread_id": st.session_state.thread_id}},
+    )
+
+    # Check for HITL interrupt (from purchase_stock tool)
+    interrupts = result.get("__interrupt__", [])
+
+    if interrupts:
+        interrupt_value = interrupts[0].value
+
+        # Show approval dialog to user
+        with st.form("hitl_approval"):
+            st.warning(f"⚠️ {interrupt_value}")
+            decision = st.radio("Your decision:", ["yes", "no"])
+            submitted = st.form_submit_button("Submit")
+
+            if submitted:
+                # Resume the graph with user's decision
+                result = chatbot.invoke(
+                    Command(resume=decision.lower() == "yes"),
+                    config={"configurable": {"thread_id": st.session_state.thread_id}},
+                )
+            else:
+                st.info("Please submit your decision to continue.")
+                st.stop()
+
+    return result
 
 # Welcome screen (show only when no messages)
 if len(st.session_state.messages) == 0:
@@ -143,13 +176,10 @@ if "quick_query" in st.session_state and st.session_state.quick_query:
     # Get bot response
     with st.chat_message("assistant"):
         with st.spinner("🔍 Researching..."):
-            result = chatbot.invoke(
-                {"messages": [HumanMessage(content=prompt)]},
-                config={"configurable": {"thread_id": st.session_state.thread_id}},
-            )
+            result = run_chatbot_with_hitl(prompt)
             response = result["messages"][-1].content
             st.markdown(response)
-    
+
     st.session_state.messages.append({"role": "assistant", "content": response})
     st.rerun()
 
@@ -165,13 +195,10 @@ if prompt := st.chat_input("Ask about stocks, earnings, or financial news..."):
     # Get bot response
     with st.chat_message("assistant"):
         with st.spinner("🔍 Researching..."):
-            result = chatbot.invoke(
-                {"messages": [HumanMessage(content=prompt)]},
-                config={"configurable": {"thread_id": st.session_state.thread_id}},
-            )
+            result = run_chatbot_with_hitl(prompt)
             response = result["messages"][-1].content
             st.markdown(response)
-    
+
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
 

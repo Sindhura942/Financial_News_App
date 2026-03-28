@@ -31,23 +31,14 @@ def get_global_stock_quote(symbol: str) -> str:
 @tool
 def get_company_news(symbol: str) -> str:
     """
-    Get latest company news for a stock.
-    Args:
-        symbol: Stock symbol (e.g., 'AAPL', 'MSFT')
+    Fetch the latest company news for a given stock symbol.
     """
     try:
-        import finnhub
-        from datetime import datetime, timedelta
         client = get_finnhub_client()
-        today = datetime.now()
-        week_ago = today - timedelta(days=7)
-        news = client.company_news(symbol, _from=week_ago.strftime('%Y-%m-%d'), to=today.strftime('%Y-%m-%d'))
+        news = client.company_news(symbol, _from="2023-01-01", to="2023-01-07")
         if not news:
             return f"No news found for {symbol}."
-        result = f"**Latest News for {symbol}:**\n"
-        for item in news[:3]:
-            result += f"- {item['headline']} ({item['source']})\n"
-        return result
+        return "\n".join([f"- {item['headline']}" for item in news[:5]])
     except Exception as e:
         return f"Error fetching news for {symbol}: {str(e)}"
 

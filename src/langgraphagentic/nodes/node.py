@@ -1,8 +1,9 @@
 from langchain_openai import ChatOpenAI
 from src.langgraphagentic.state.state import State
 from src.langgraphagentic.tools.stock_tools import get_stock_price, get_earnings_calendar, get_company_overview
+from src.langgraphagentic.tools.purchase_stock_tool import purchase_stock
 from src.langgraphagentic.tools.search_tool import get_tools
-from src.langgraphagentic.tools.finnhub_tools import get_finnhub_tools
+from src.langgraphagentic.tools.finnhub_tools import get_finnhub_tools, get_company_news
 from src.langgraphagentic.tools.yahoo_tools import get_yahoo_tools
 from dotenv import load_dotenv
 from pathlib import Path
@@ -24,7 +25,7 @@ def get_openai_api_key():
 search_tools = get_tools()
 finnhub_tools = get_finnhub_tools()
 yahoo_tools = get_yahoo_tools()
-tools = [get_stock_price, get_earnings_calendar, get_company_overview] + search_tools + finnhub_tools + yahoo_tools
+tools = [get_stock_price, get_earnings_calendar, get_company_overview, purchase_stock] + search_tools + finnhub_tools + yahoo_tools
 
 llm = ChatOpenAI(model="gpt-5.1", api_key=get_openai_api_key())
 llm_with_tools = llm.bind_tools(tools)
@@ -65,5 +66,15 @@ def chat_node(state: State):
     messages = state["messages"]
     from langchain_core.messages import SystemMessage
     messages_with_system = [SystemMessage(content=SYSTEM_PROMPT)] + messages
+
+    # Debug: Log the messages being sent
+    print("Messages with system:", messages_with_system)
+
     response = llm_with_tools.invoke(messages_with_system)
+
+    # Debug: Log the response
+    print("Response:", response)
+
     return {"messages": [response]}
+
+llm_with_tools = llm.bind_tools(tools)
